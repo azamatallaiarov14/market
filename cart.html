@@ -36,28 +36,51 @@
 
 <script>
     window.onload = function() {
-        renderCart();
-    };
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    const cartContainer = document.getElementById('cartContainer'); // Убедись, что ID совпадает
 
-    function renderCart() {
-        let cartBox = document.getElementById('cartBox');
-        let fullTotalSpan = document.getElementById('fullTotal');
-        cartBox.innerHTML = "";
-        
-        let cartItems = JSON.parse(localStorage.getItem('userCart')) || [];
-        
-        // --- Логика группировки (чтобы не было дублей карточек) ---
-        let grouped = {};
-        let totalSum = 0;
+    if (!user) {
+        cartContainer.innerHTML = "<h2>Пожалуйста, войдите, чтобы увидеть корзину</h2>";
+        return;
+    }
 
-        cartItems.forEach(item => {
-            if (grouped[item.name]) {
-                grouped[item.name].qty += 1;
-            } else {
-                grouped[item.name] = { ...item, qty: 1 };
-            }
-            totalSum += Number(item.price);
+    // Загружаем товары из Firebase именно для этого пользователя
+    db.ref('carts/' + user.login).on('value', (snapshot) => {
+        const data = snapshot.val();
+        cartContainer.innerHTML = ""; // Очищаем перед загрузкой
+
+        if (!data) {
+            cartContainer.innerHTML = "<p>Ваша корзина пуста.</p>";
+            return;
+        }
+
+        let total = 0;
+        Object.keys(data).forEach(id => {
+            const item = data[id];
+            total += parseInt(item.price);
+            
+            const card = document.createElement('div');
+            card.className = 'cart-item'; // Твой стиль для карточки в корзине
+            card.innerHTML = `
+                <img src="${item.image}" width="50">
+                <span>${item.name} - ${item.price} сум</span>
+                <button onclick="removeFromCart('${id}')" style="color:red;">Удалить</button>
+            `;
+            cartContainer.appendChild(card);
         });
+
+        // Добавляем итоговую сумму
+        const totalDiv = document.createElement('div');
+        totalDiv.innerHTML = `<h3>Итого: ${total} сум</h3>`;
+        cartContainer.appendChild(totalDiv);
+    });
+};
+
+// Функция удаления из облачной корзины
+function removeFromCart(itemId) {
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    db.ref('carts/' + user.login).child(itemId).remove();
+}
 
         // Рисуем карточки
         Object.values(grouped).forEach(p => {
