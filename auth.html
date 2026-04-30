@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Вход / Регистрация - Azamat Market</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .auth-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn-main { background: #3498db; }
+        .toggle-link { color: #3498db; cursor: pointer; font-size: 14px; margin-top: 15px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="auth-card">
+    <h2 id="authTitle">Войти</h2>
+    <input type="text" id="userLogin" placeholder="Логин (например, номер телефона)">
+    <input type="password" id="userPass" placeholder="Пароль">
+    
+    <button class="btn-main" id="authBtn" onclick="processAuth()">Войти</button>
+    <span class="toggle-link" onclick="toggleMode()" id="toggleText">Нет аккаунта? Регистрация</span>
+    <br>
+    <button style="background:#7f8c8d;" onclick="window.location.href='index.html'">Назад на сайт</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
+        authDomain: "azamat-market-a9eba.firebaseapp.com",
+        databaseURL: "https://azamat-market-a9eba-default-rtdb.firebaseio.com/",
+        projectId: "azamat-market-a9eba",
+        storageBucket: "azamat-market-a9eba.firebasestorage.app",
+        messagingSenderId: "279981697073",
+        appId: "1:279981697073:web:e841afeebb43b67ba00d10"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let isLoginMode = true;
+
+    function toggleMode() {
+        isLoginMode = !isLoginMode;
+        document.getElementById('authTitle').innerText = isLoginMode ? "Войти" : "Регистрация";
+        document.getElementById('authBtn').innerText = isLoginMode ? "Войти" : "Создать аккаунт";
+        document.getElementById('toggleText').innerText = isLoginMode ? "Нет аккаунта? Регистрация" : "Уже есть аккаунт? Войти";
+    }
+
+    function processAuth() {
+        const login = document.getElementById('userLogin').value;
+        const pass = document.getElementById('userPass').value;
+
+        if(!login || !pass) { alert("Заполните все поля!"); return; }
+
+        if (isLoginMode) {
+            // ЛОГИКА ВХОДА
+            db.ref('users/' + login).once('value', (snapshot) => {
+                const user = snapshot.val();
+                if (user && user.password === pass) {
+                    localStorage.setItem('currentUser', JSON.stringify({login: login}));
+                    alert("С возвращением!");
+                    window.location.href = 'index.html';
+                } else {
+                    alert("Ошибка! Неверный логин или пароль.");
+                }
+            });
+        } else {
+            // ЛОГИКА РЕГИСТРАЦИИ
+            db.ref('users/' + login).set({
+                password: pass,
+                regDate: Date.now()
+            }).then(() => {
+                alert("Аккаунт создан! Теперь войдите.");
+                toggleMode();
+            });
+        }
+    }
+</script>
+</body>
+</html>
