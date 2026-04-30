@@ -18,22 +18,29 @@
 </head>
 <body>
     <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #2c3e50; color: white;">
-    <div><strong>AZAMAT MARKET</strong></div>
     
-    <!-- Навигация, которая видна ВСЕМ -->
-    <nav>
-        <a href="index.html" style="color:white; margin-right:15px; text-decoration:none;">Главная</a>
-        <a href="about.html" style="color:white; margin-right:15px; text-decoration:none;">О нас</a>
-        <a href="seller-request.html" style="color:white; margin-right:15px; text-decoration:none;">Стать продавцом</a>
-    </nav>
+    <!-- Левая часть: Название и О нас -->
+    <div style="display: flex; align-items: center;">
+        <strong style="font-size: 20px; margin-right: 20px;">AZAMAT MARKET</strong>
+        <a href="about.html" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">О нас</a>
+    </div>
+    
+    <!-- Правая часть: Стать продавцом, Приветствие и Корзина -->
+    <div style="display: flex; align-items: center;">
+        
+        <!-- Фиолетовая кнопка Стать продавцом -->
+        <a href="seller-request.html" style="background: #9b59b6; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 20px; transition: 0.3s;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='#9b59b6'">
+            Стать продавцом
+        </a>
 
-    <div id="userSection">
-        <!-- Сюда скрипт подставит либо "Войти", либо "Привет, Юзер" -->
-        <a href="auth.html" style="color:white; text-decoration:none; margin-right:15px;">Войти</a>
-        <a href="cart.html" class="btn-cart" style="background:#f1c40f; color:black; padding:5px 10px; border-radius:5px; text-decoration:none;">🛒 Корзина</a>
+        <div id="userSection" style="display: flex; align-items: center;">
+            <!-- Сюда скрипт подставит либо "Войти", либо "Привет, Юзер" -->
+            <a href="auth.html" style="color: white; text-decoration: none; margin-right: 15px;">Войти</a>
+            <a href="cart.html" style="background: #f1c40f; color: black; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold;">🛒 Корзина</a>
+        </div>
+        
     </div>
 </header>
-
 <div class="container" id="box">
     <h2 style="color:#bbb; width:100%; text-align:center;">Загрузка товаров из облака...</h2>
 </div>
