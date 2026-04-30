@@ -30,6 +30,13 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
+    window.onload = function() {
+    let pass = prompt("Введите пароль администратора:");
+    if (pass !== "Azamat777") { // Придумай свой пароль здесь
+        alert("Доступ закрыт!");
+        window.location.href = "index.html";
+    }
+};
     const firebaseConfig = {
         apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
         authDomain: "azamat-market-a9eba.firebaseapp.com",
