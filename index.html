@@ -91,24 +91,28 @@
         });
     });
 
-    function addToCart(name, price, img) {
-        let cart = JSON.parse(localStorage.getItem('userCart')) || [];
-        cart.push({name: name, price: price, img: img});
-        localStorage.setItem('userCart', JSON.stringify(cart));
-        alert("Добавлено в корзину!");
-    }
-    window.onload = function() {
+function addToCart(productId, name, price, image) {
     const user = JSON.parse(localStorage.getItem('currentUser'));
-    const section = document.getElementById('userSection');
-    
-    if (user) {
-        // Если пользователь вошел, меняем ТОЛЬКО правую часть (вход на имя)
-        section.innerHTML = `
-            <span style="margin-right:15px;">👋 Привет, <b>${user.login}</b></span>
-            <a href="cart.html" class="btn-cart" style="background:#f1c40f; color:black; padding:5px 10px; border-radius:5px; text-decoration:none;">🛒 Корзина</a>
-            <button onclick="logout()" style="background:none; border:none; color:#ff7675; cursor:pointer; margin-left:10px;">Выйти</button>
-        `;
+
+    if (!user) {
+        alert("Пожалуйста, войдите в аккаунт, чтобы добавлять товары в корзину!");
+        window.location.href = 'auth.html';
+        return;
     }
+
+    // Сохраняем товар в облако под именем этого пользователя
+    const cartRef = db.ref('carts/' + user.login);
+    
+    cartRef.push({
+        productId: productId,
+        name: name,
+        price: price,
+        image: image,
+        date: Date.now()
+    }).then(() => {
+        alert("Товар " + name + " добавлен в вашу облачную корзину!");
+    });
+}
     
     // Не забудь вызвать функцию загрузки товаров, если она у тебя была
     if (typeof loadProducts === "function") {
