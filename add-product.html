@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить товар - Облако</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .form-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 400px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-save { background: #9b59b6; }
+        .btn-back { background: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+<div class="form-card" id="mainContent" style="display:none;">
+    <h2>Новый товар (Cloud)</h2>
+    <input type="text" id="n" placeholder="Название товара">
+    <input type="number" id="p" placeholder="Цена (сум)">
+    <input type="text" id="i" placeholder="Ссылка на фото">
+    
+    <button class="btn-save" onclick="saveToCloud()">Опубликовать в Azamat Market</button>
+    <button class="btn-back" onclick="window.location.href='index.html'">Назад</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
+        authDomain: "azamat-market-a9eba.firebaseapp.com",
+        databaseURL: "https://azamat-market-a9eba-default-rtdb.firebaseio.com/",
+        projectId: "azamat-market-a9eba",
+        storageBucket: "azamat-market-a9eba.firebasestorage.app",
+        messagingSenderId: "279981697073",
+        appId: "1:279981697073:web:e841afeebb43b67ba00d10"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Проверка ключа (как мы делали раньше)
+    window.onload = function() {
+    let userKey = prompt("Введите ваш личный ключ продавца:");
+    
+    if (userKey === "admin") {
+        document.getElementById('mainContent').style.display = 'block';
+        return;
+    }
+
+    // Проверяем ключ в Firebase
+    db.ref('approvedSellers').orderByChild('key').equalTo(userKey).once('value', (snapshot) => {
+        if (snapshot.exists()) {
+            let sellerData = snapshot.val();
+            // Получаем имя первого найденного продавца
+            let name = Object.values(sellerData)[0].name;
+            alert("Добро пожаловать, " + name + "!");
+            document.getElementById('mainContent').style.display = 'block';
+        } else {
+            alert("Доступ запрещен! Ключ не найден в базе.");
+            window.location.href = "index.html";
+        }
+    });
+};
+    function saveToCloud() {
+        let name = document.getElementById('n').value;
+        let price = document.getElementById('p').value;
+        let img = document.getElementById('i').value;
+
+        if (name == "" || price == "") {
+            alert("Заполните поля!");
+            return;
+        }
+
+        if (img == "") { img = "https://via.placeholder.com/150"; }
+
+        // ОТПРАВКА В FIREBASE
+        db.ref('products').push({
+            name: name,
+            price: price,
+            img: img
+        }).then(() => {
+            alert("Товар успешно улетел в облако!");
+            window.location.href = "index.html";
+        }).catch((error) => {
+            alert("Ошибка: " + error.message);
+        });
+    }
+</script>
+</body>
+</html>

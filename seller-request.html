@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Заявка на продавца - Azamat Market</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .form-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
+        .btn-send { background: #9b59b6; margin-top: 10px; }
+        .btn-send:hover { background: #8e44ad; }
+        .btn-back { background: #7f8c8d; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="form-card">
+    <h2>Стать продавцом</h2>
+    <p style="font-size: 14px; color: #666; text-align: center;">Оставьте заявку, и администрация свяжется с вами.</p>
+    
+    <input type="text" id="surname" placeholder="Фамилия">
+    <input type="text" id="name" placeholder="Имя">
+    <input type="text" id="phone" placeholder="+998 (__) ___ __ __">
+    
+    <button class="btn-send" onclick="sendRequest()">Отправить заявку</button>
+    <button class="btn-back" onclick="window.location.href='index.html'">Назад</button>
+</div>
+
+<script>
+   function sendRequest() {
+    let name = document.getElementById('name').value;
+    let phone = document.getElementById('phone').value;
+
+    if(name == "" || phone == "") { alert("Заполните поля!"); return; }
+
+    // Отправляем заявку в облако Google
+    db.ref('requests').push({
+        name: name,
+        phone: phone,
+        status: "waiting"
+    }).then(() => {
+        alert("Заявка отправлена! Ждите одобрения Азамата.");
+    });
+}
+
+        // Сохраняем
+        localStorage.setItem('sellerRequests', JSON.stringify(requests));
+
+        alert("Спасибо, Азамат рассмотрит вашу заявку!");
+        window.location.href = 'index.html';
+    }
+</script>
+
+</body>
+</html>

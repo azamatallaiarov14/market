@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Azamat Market - Global</title>
+    <style>
+        body { font-family: sans-serif; background: #eee; margin: 0; padding: 20px; }
+        header { background: #222; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+        .product { background: #fff; padding: 15px; width: 220px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .product img { width: 100%; height: 150px; object-fit: contain; }
+        button { cursor: pointer; padding: 10px; border: none; border-radius: 5px; color: white; }
+        .btn-buy { background: #27ae60; width: 100%; margin-top: 5px; }
+        .btn-seller { background: #9b59b6; text-decoration: none; padding: 10px 20px; font-weight: bold; border-radius: 5px; color: white; }
+        .btn-cart { background: #3498db; text-decoration: none; padding: 10px 20px; border-radius: 5px; color: white; font-weight: bold; }
+        footer { margin-top: 50px; text-align: center; color: #888; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div><strong>AZAMAT MARKET</strong></div>
+    <div>
+        <a href="seller-request.html" class="btn-seller">➕ Стать продавцом</a>
+        <a href="cart.html" class="btn-cart" id="cartBtn">🛒 Корзина</a>
+    </div>
+</header>
+
+<div class="container" id="box">
+    <h2 style="color:#bbb; width:100%; text-align:center;">Загрузка товаров из облака...</h2>
+</div>
+
+<footer>
+    <p>© 2026 Azamat Market. Global Cloud Version.</p>
+    <a href="admin.html" style="color:#ccc; text-decoration:none;">Админ-панель</a>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    // ТВОИ КЛЮЧИ
+    const firebaseConfig = {
+        apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
+        authDomain: "azamat-market-a9eba.firebaseapp.com",
+        databaseURL: "https://azamat-market-a9eba-default-rtdb.firebaseio.com/",
+        projectId: "azamat-market-a9eba",
+        storageBucket: "azamat-market-a9eba.firebasestorage.app",
+        messagingSenderId: "279981697073",
+        appId: "1:279981697073:web:e841afeebb43b67ba00d10"
+    };
+
+    // Инициализация
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Загрузка товаров в реальном времени
+    db.ref('products').on('value', (snapshot) => {
+        const box = document.getElementById('box');
+        box.innerHTML = "";
+        const data = snapshot.val();
+
+        if (!data) {
+            box.innerHTML = "<h2 style='color:#bbb; width:100%; text-align:center;'>На складе пусто. Ждем продавцов!</h2>";
+            return;
+        }
+
+        Object.values(data).forEach(p => {
+            let card = document.createElement('div');
+            card.className = 'product';
+            card.innerHTML = `<img src="${p.img}">
+                             <h3>${p.name}</h3>
+                             <p><strong>${p.price} сум</strong></p>
+                             <button class="btn-buy" onclick="addToCart('${p.name}', ${p.price}, '${p.img}')">Купить</button>`;
+            box.appendChild(card);
+        });
+    });
+
+    function addToCart(name, price, img) {
+        let cart = JSON.parse(localStorage.getItem('userCart')) || [];
+        cart.push({name: name, price: price, img: img});
+        localStorage.setItem('userCart', JSON.stringify(cart));
+        alert("Добавлено в корзину!");
+    }
+</script>
+</body>
+</html>

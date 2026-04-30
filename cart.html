@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Корзина - Azamat Market</title>
+    <style>
+        body { font-family: sans-serif; background: #eee; margin: 0; padding: 20px; }
+        header { background: #222; color: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+        
+        /* Карточка в корзине */
+        .product { background: #fff; padding: 15px; width: 220px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
+        .product img { width: 100%; height: 130px; object-fit: contain; }
+        
+        /* Счетчик количества в углу карточки */
+        .qty-badge { position: absolute; bottom: 10px; right: 10px; background: #e67e22; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }
+        
+        button { cursor: pointer; padding: 10px; border: none; border-radius: 5px; color: white; }
+        .btn-clear { background: #e74c3c; font-weight: bold; padding: 10px 20px; } /* Красная кнопка */
+        .btn-back { background: #7f8c8d; text-decoration: none; color: white; padding: 10px; border-radius: 5px; }
+        
+        .total-price { font-size: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="total-price">Итого: <span id="fullTotal">0</span> сум</div>
+    <div>
+        <a href="index.html" class="btn-back">Вернуться в магазин</a>
+        <button class="btn-clear" onclick="clearCart()">Очистить корзину</button>
+    </div>
+</header>
+
+<div class="container" id="cartBox"></div>
+
+<script>
+    window.onload = function() {
+        renderCart();
+    };
+
+    function renderCart() {
+        let cartBox = document.getElementById('cartBox');
+        let fullTotalSpan = document.getElementById('fullTotal');
+        cartBox.innerHTML = "";
+        
+        let cartItems = JSON.parse(localStorage.getItem('userCart')) || [];
+        
+        // --- Логика группировки (чтобы не было дублей карточек) ---
+        let grouped = {};
+        let totalSum = 0;
+
+        cartItems.forEach(item => {
+            if (grouped[item.name]) {
+                grouped[item.name].qty += 1;
+            } else {
+                grouped[item.name] = { ...item, qty: 1 };
+            }
+            totalSum += Number(item.price);
+        });
+
+        // Рисуем карточки
+        Object.values(grouped).forEach(p => {
+            let card = document.createElement('div');
+            card.className = 'product';
+            card.innerHTML = '<img src="' + p.img + '">' +
+                             '<h3>' + p.name + '</h3>' +
+                             '<p>' + p.price + ' сум</p>' +
+                             '<div class="qty-badge">' + p.qty + ' шт.</div>';
+            cartBox.appendChild(card);
+        });
+
+        fullTotalSpan.innerText = totalSum.toLocaleString();
+    }
+
+    function clearCart() {
+        if(confirm("Вы уверены, что хотите очистить корзину?")) {
+            localStorage.removeItem('userCart');
+            renderCart();
+        }
+    }
+</script>
+</body>
+</html>
