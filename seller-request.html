@@ -14,9 +14,6 @@
         .btn-back { background: #7f8c8d; margin-top: 10px; }
     </style>
 </head>
-    !-- Убедись, что эти скрипты есть в <head> или в конце <body> -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <body>
 
 <div class="form-card">
@@ -31,8 +28,13 @@
     <button class="btn-back" onclick="window.location.href='index.html'">Назад</button>
 </div>
 
+<!-- ПОДКЛЮЧЕНИЕ FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 <script>
-  const firebaseConfig = {
+    // ТВОИ КЛЮЧИ (ОБЯЗАТЕЛЬНО ДОЛЖНЫ БЫТЬ ТУТ)
+    const firebaseConfig = {
         apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
         authDomain: "azamat-market-a9eba.firebaseapp.com",
         databaseURL: "https://azamat-market-a9eba-default-rtdb.firebaseio.com/",
@@ -42,7 +44,7 @@
         appId: "1:279981697073:web:e841afeebb43b67ba00d10"
     };
 
-    // Инициализация
+    // Инициализация базы данных
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -50,24 +52,25 @@
 
     function sendRequest() {
         let name = document.getElementById('name').value;
+        let surname = document.getElementById('surname').value;
         let phone = document.getElementById('phone').value;
 
         if(name == "" || phone == "") { 
-            alert("Пожалуйста, заполните все поля!"); 
+            alert("Пожалуйста, заполните Имя и Телефон!"); 
             return; 
         }
 
-        // ОТПРАВКА В ОБЛАКО
+        // Отправляем заявку в облако Google
         db.ref('requests').push({
-            name: name,
+            name: name + " " + surname,
             phone: phone,
             status: "waiting",
-            date: new Date().toISOString()
+            timestamp: Date.now()
         }).then(() => {
-            alert("Заявка успешно отправлена! Азамат рассмотрит её в ближайшее время.");
-            window.location.href = "index.html";
+            alert("Заявка успешно отправлена! Ждите одобрения Азамата.");
+            window.location.href = 'index.html';
         }).catch((error) => {
-            alert("Ошибка при отправке: " + error.message);
+            alert("Ошибка Firebase: " + error.message);
         });
     }
 </script>
