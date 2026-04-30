@@ -14,6 +14,9 @@
         .btn-back { background: #7f8c8d; margin-top: 10px; }
     </style>
 </head>
+    !-- Убедись, что эти скрипты есть в <head> или в конце <body> -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <body>
 
 <div class="form-card">
@@ -29,27 +32,43 @@
 </div>
 
 <script>
-   function sendRequest() {
-    let name = document.getElementById('name').value;
-    let phone = document.getElementById('phone').value;
+  const firebaseConfig = {
+        apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
+        authDomain: "azamat-market-a9eba.firebaseapp.com",
+        databaseURL: "https://azamat-market-a9eba-default-rtdb.firebaseio.com/",
+        projectId: "azamat-market-a9eba",
+        storageBucket: "azamat-market-a9eba.firebasestorage.app",
+        messagingSenderId: "279981697073",
+        appId: "1:279981697073:web:e841afeebb43b67ba00d10"
+    };
 
-    if(name == "" || phone == "") { alert("Заполните поля!"); return; }
+    // Инициализация
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
 
-    // Отправляем заявку в облако Google
-    db.ref('requests').push({
-        name: name,
-        phone: phone,
-        status: "waiting"
-    }).then(() => {
-        alert("Заявка отправлена! Ждите одобрения Азамата.");
-    });
-}
+    function sendRequest() {
+        let name = document.getElementById('name').value;
+        let phone = document.getElementById('phone').value;
 
-        // Сохраняем
-        localStorage.setItem('sellerRequests', JSON.stringify(requests));
+        if(name == "" || phone == "") { 
+            alert("Пожалуйста, заполните все поля!"); 
+            return; 
+        }
 
-        alert("Спасибо, Азамат рассмотрит вашу заявку!");
-        window.location.href = 'index.html';
+        // ОТПРАВКА В ОБЛАКО
+        db.ref('requests').push({
+            name: name,
+            phone: phone,
+            status: "waiting",
+            date: new Date().toISOString()
+        }).then(() => {
+            alert("Заявка успешно отправлена! Азамат рассмотрит её в ближайшее время.");
+            window.location.href = "index.html";
+        }).catch((error) => {
+            alert("Ошибка при отправке: " + error.message);
+        });
     }
 </script>
 
