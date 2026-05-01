@@ -5,20 +5,19 @@
     <title>Azamat Market - Global</title>
     <style>
         body { font-family: sans-serif; background: #eee; margin: 0; padding: 20px; }
-        header { background: #222; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
-        .container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+        header { background: #2c3e50; color: #fff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; justify-content: center; }
         .product { background: #fff; padding: 15px; width: 220px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .product img { width: 100%; height: 150px; object-fit: contain; }
-        button { cursor: pointer; padding: 10px; border: none; border-radius: 5px; color: white; }
-        .btn-buy { background: #27ae60; width: 100%; margin-top: 5px; }
-        .btn-seller { background: #9b59b6; text-decoration: none; padding: 10px 20px; font-weight: bold; border-radius: 5px; color: white; }
-        .btn-cart { background: #3498db; text-decoration: none; padding: 10px 20px; border-radius: 5px; color: white; font-weight: bold; }
-        footer { margin-top: 50px; text-align: center; color: #888; font-size: 12px; }
+        .product img { width: 100%; height: 150px; object-fit: contain; border-radius: 5px; }
+        button { cursor: pointer; padding: 10px; border: none; border-radius: 5px; color: white; font-weight: bold; }
+        .btn-buy { background: #27ae60; width: 100%; margin-top: 10px; transition: 0.3s; }
+        .btn-buy:hover { background: #219150; }
+        footer { margin-top: 50px; text-align: center; color: #888; font-size: 12px; padding-bottom: 20px; }
     </style>
 </head>
 <body>
-    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #2c3e50; color: white;">
-    
+
+<header>
     <!-- Левая часть: Название и О нас -->
     <div style="display: flex; align-items: center;">
         <strong style="font-size: 20px; margin-right: 20px;">AZAMAT MARKET</strong>
@@ -27,20 +26,17 @@
     
     <!-- Правая часть: Стать продавцом, Приветствие и Корзина -->
     <div style="display: flex; align-items: center;">
-        
-        <!-- Фиолетовая кнопка Стать продавцом -->
         <a href="seller-request.html" style="background: #9b59b6; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 20px; transition: 0.3s;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='#9b59b6'">
             Стать продавцом
         </a>
 
         <div id="userSection" style="display: flex; align-items: center;">
-            <!-- Сюда скрипт подставит либо "Войти", либо "Привет, Юзер" -->
             <a href="auth.html" style="color: white; text-decoration: none; margin-right: 15px;">Войти</a>
             <a href="cart.html" style="background: #f1c40f; color: black; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold;">🛒 Корзина</a>
         </div>
-        
     </div>
 </header>
+
 <div class="container" id="box">
     <h2 style="color:#bbb; width:100%; text-align:center;">Загрузка товаров из облака...</h2>
 </div>
@@ -50,40 +46,11 @@
     <a href="admin.html" style="color:#ccc; text-decoration:none;">Админ-панель</a>
 </footer>
 
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-    function loadProducts() {
-    const container = document.getElementById('productsContainer'); // Проверь, что ID совпадает с HTML
-
-    db.ref('products').on('value', (snapshot) => {
-        const data = snapshot.val();
-        container.innerHTML = ""; // Убираем надпись "Загрузка..."
-
-        if (!data) {
-            container.innerHTML = "<h2>На складе пока пусто</h2>";
-            return;
-        }
-
-        // Перебираем товары и создаем карточки
-        Object.keys(data).forEach(id => {
-            const prod = data[id];
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.innerHTML = `
-                <img src="${prod.image}" alt="${prod.name}" style="width:100%; border-radius:10px;">
-                <h3>${prod.name}</h3>
-                <p style="color: #27ae60; font-weight: bold;">${prod.price} сум</p>
-                <button onclick="addToCart('${id}', '${prod.name}', '${prod.price}', '${prod.image}')" 
-                        style="width:100%; padding:10px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer;">
-                    Купить
-                </button>
-            `;
-            container.appendChild(card);
-        });
-    });
-}
     // ТВОИ КЛЮЧИ
     const firebaseConfig = {
         apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
@@ -95,81 +62,82 @@
         appId: "1:279981697073:web:e841afeebb43b67ba00d10"
     };
 
-    // Инициализация
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Загрузка товаров в реальном времени
-    db.ref('products').on('value', (snapshot) => {
+    // 1. ФУНКЦИЯ ЗАГРУЗКИ ТОВАРОВ
+    function loadProducts() {
         const box = document.getElementById('box');
-        box.innerHTML = "";
-        const data = snapshot.val();
+        
+        db.ref('products').on('value', (snapshot) => {
+            const data = snapshot.val();
+            box.innerHTML = ""; // Очищаем надпись "Загрузка"
 
-        if (!data) {
-            box.innerHTML = "<h2 style='color:#bbb; width:100%; text-align:center;'>На складе пусто. Ждем продавцов!</h2>";
+            if (!data) {
+                box.innerHTML = "<h2 style='color:#bbb; width:100%; text-align:center;'>На складе пусто. Ждем продавцов!</h2>";
+                return;
+            }
+
+            Object.keys(data).forEach(id => {
+                const p = data[id];
+                // Проверяем, как называются поля в твоей базе: img или image
+                let imgSource = p.img || p.image; 
+                
+                let card = document.createElement('div');
+                card.className = 'product';
+                card.innerHTML = `
+                    <img src="${imgSource}">
+                    <h3>${p.name}</h3>
+                    <p><strong>${p.price} сум</strong></p>
+                    <button class="btn-buy" onclick="addToCart('${id}', '${p.name}', '${p.price}', '${imgSource}')">Купить</button>
+                `;
+                box.appendChild(card);
+            });
+        });
+    }
+
+    // 2. ФУНКЦИЯ ДОБАВЛЕНИЯ В КОРЗИНУ
+    function addToCart(productId, name, price, image) {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (!user) {
+            alert("Пожалуйста, войдите в аккаунт, чтобы добавлять товары в корзину!");
+            window.location.href = 'auth.html';
             return;
         }
 
-        Object.values(data).forEach(p => {
-            let card = document.createElement('div');
-            card.className = 'product';
-            card.innerHTML = `<img src="${p.img}">
-                             <h3>${p.name}</h3>
-                             <p><strong>${p.price} сум</strong></p>
-                             <button class="btn-buy" onclick="addToCart('${p.name}', ${p.price}, '${p.img}')">Купить</button>`;
-            box.appendChild(card);
+        db.ref('carts/' + user.login).push({
+            productId: productId,
+            name: name,
+            price: price,
+            image: image,
+            date: Date.now()
+        }).then(() => {
+            alert("Товар " + name + " добавлен в вашу облачную корзину!");
         });
-    });
-
-function addToCart(productId, name, price, image) {
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-
-    if (!user) {
-        alert("Пожалуйста, войдите в аккаунт, чтобы добавлять товары в корзину!");
-        window.location.href = 'auth.html';
-        return;
     }
 
-    // Сохраняем товар в облако под именем этого пользователя
-    const cartRef = db.ref('carts/' + user.login);
-    
-    cartRef.push({
-        productId: productId,
-        name: name,
-        price: price,
-        image: image,
-        date: Date.now()
-    }).then(() => {
-        alert("Товар " + name + " добавлен в вашу облачную корзину!");
-    });
-}
-    
-    // Не забудь вызвать функцию загрузки товаров, если она у тебя была
-    if (typeof loadProducts === "function") {
-        loadProducts();
+    // 3. ФУНКЦИЯ ВЫХОДА
+    function logout() {
+        localStorage.removeItem('currentUser');
+        location.reload();
     }
-};
 
-function logout() {
-    localStorage.removeItem('currentUser');
-    location.reload();
-}
+    // 4. ЗАПУСК ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
     window.onload = function() {
-    // 1. Проверяем пользователя для шапки
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-    const section = document.getElementById('userSection');
-    
-    if (user) {
-        section.innerHTML = `
-            <span style="margin-right:15px;">👋 Привет, <b>${user.login}</b></span>
-            <a href="cart.html" style="background: #f1c40f; color: black; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold;">🛒 Корзина</a>
-            <button onclick="logout()" style="background:none; border:none; color:#ff7675; cursor:pointer; margin-left:10px;">Выйти</button>
-        `;
-    }
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const section = document.getElementById('userSection');
+        
+        if (user) {
+            section.innerHTML = `
+                <span style="margin-right:15px;">👋 Привет, <b>${user.login}</b></span>
+                <a href="cart.html" style="background: #f1c40f; color: black; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold;">🛒 Корзина</a>
+                <button onclick="logout()" style="background:none; border:none; color:#ff7675; cursor:pointer; margin-left:10px;">Выйти</button>
+            `;
+        }
 
-    // 2. ЗАПУСКАЕМ ЗАГРУЗКУ ТОВАРОВ (Это то, что могло потеряться)
-    loadProducts(); 
-};
+        loadProducts(); // Запускаем загрузку товаров
+    };
 </script>
 </body>
 </html>
