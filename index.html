@@ -54,6 +54,36 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
+    function loadProducts() {
+    const container = document.getElementById('productsContainer'); // Проверь, что ID совпадает с HTML
+
+    db.ref('products').on('value', (snapshot) => {
+        const data = snapshot.val();
+        container.innerHTML = ""; // Убираем надпись "Загрузка..."
+
+        if (!data) {
+            container.innerHTML = "<h2>На складе пока пусто</h2>";
+            return;
+        }
+
+        // Перебираем товары и создаем карточки
+        Object.keys(data).forEach(id => {
+            const prod = data[id];
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <img src="${prod.image}" alt="${prod.name}" style="width:100%; border-radius:10px;">
+                <h3>${prod.name}</h3>
+                <p style="color: #27ae60; font-weight: bold;">${prod.price} сум</p>
+                <button onclick="addToCart('${id}', '${prod.name}', '${prod.price}', '${prod.image}')" 
+                        style="width:100%; padding:10px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer;">
+                    Купить
+                </button>
+            `;
+            container.appendChild(card);
+        });
+    });
+}
     // ТВОИ КЛЮЧИ
     const firebaseConfig = {
         apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
@@ -124,6 +154,22 @@ function logout() {
     localStorage.removeItem('currentUser');
     location.reload();
 }
+    window.onload = function() {
+    // 1. Проверяем пользователя для шапки
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    const section = document.getElementById('userSection');
+    
+    if (user) {
+        section.innerHTML = `
+            <span style="margin-right:15px;">👋 Привет, <b>${user.login}</b></span>
+            <a href="cart.html" style="background: #f1c40f; color: black; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold;">🛒 Корзина</a>
+            <button onclick="logout()" style="background:none; border:none; color:#ff7675; cursor:pointer; margin-left:10px;">Выйти</button>
+        `;
+    }
+
+    // 2. ЗАПУСКАЕМ ЗАГРУЗКУ ТОВАРОВ (Это то, что могло потеряться)
+    loadProducts(); 
+};
 </script>
 </body>
 </html>
