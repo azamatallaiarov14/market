@@ -2,41 +2,30 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Админка Azamat Market (Cloud)</title>
+    <title>Управление товарами - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; background: #2c3e50; color: white; padding: 20px; }
-        .card { background: #34495e; padding: 20px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        button { cursor: pointer; padding: 10px 15px; border: none; border-radius: 5px; color: white; font-weight: bold; }
-        .btn-approve { background: #27ae60; margin-right: 10px; }
-        .btn-delete { background: #e74c3c; }
-        .key-display { background: #f1c40f; color: #000; padding: 5px; border-radius: 3px; font-family: monospace; }
-        h1 { border-bottom: 2px solid #f1c40f; padding-bottom: 10px; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .admin-container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .product-row { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+        .product-row img { width: 50px; height: 50px; object-fit: contain; }
+        .btn-delete { background: #ff7675; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-delete:hover { background: #e84393; }
+        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #3498db; }
     </style>
 </head>
 <body>
 
-<h1>Панель управления (Cloud)</h1>
+<div class="admin-container">
+    <a href="index.html" class="back-link">← На главную</a>
+    <h2>Управление товарами</h2>
+    <div id="adminProductList">Загрузка товаров...</div>
+</div>
 
-<h3>Новые заявки:</h3>
-<div id="requestsList">Загрузка...</div>
-
-<hr>
-
-<h3>Одобренные продавцы:</h3>
-<div id="sellersList">Загрузка...</div>
-
-<!-- ПОДКЛЮЧЕНИЕ FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-    window.onload = function() {
-    let pass = prompt("Введите пароль администратора:");
-    if (pass !== "Azamat987") { // Придумай свой пароль здесь
-        alert("Доступ закрыт!");
-        window.location.href = "index.html";
-    }
-};
     const firebaseConfig = {
         apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
         authDomain: "azamat-market-a9eba.firebaseapp.com",
@@ -50,80 +39,53 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 1. Слушаем новые заявки
-    db.ref('requests').on('value', (snapshot) => {
-        const list = document.getElementById('requestsList');
-        list.innerHTML = "";
-        const data = snapshot.val();
-
-        if (!data) {
-            list.innerHTML = "<p>Новых заявок нет</p>";
-            return;
-        }
-
-        Object.keys(data).forEach(id => {
-            let req = data[id];
-            let item = document.createElement('div');
-            item.className = 'card';
-            item.innerHTML = `
-                <div>
-                    <strong>${req.name}</strong> (${req.phone})
-                </div>
-                <div>
-                    <button class="btn-approve" onclick="approveSeller('${id}', '${req.name}', '${req.phone}')">Одобрить</button>
-                    <button class="btn-delete" onclick="deleteRequest('${id}')">Удалить</button>
-                </div>
-            `;
-            list.appendChild(item);
-        });
-    });
-
-    // 2. Слушаем список одобренных
-    db.ref('approvedSellers').on('value', (snapshot) => {
-        const list = document.getElementById('sellersList');
-        list.innerHTML = "";
-        const data = snapshot.val();
-
-        if (!data) {
-            list.innerHTML = "<p>Пока нет одобренных продавцов</p>";
-            return;
-        }
-
-        Object.keys(data).forEach(id => {
-            let seller = data[id];
-            let item = document.createElement('div');
-            item.className = 'card';
-            item.innerHTML = `
-                <div>${seller.name} - <span class="key-display">${seller.key}</span></div>
-                <button class="btn-delete" onclick="removeSeller('${id}')">Заблокировать</button>
-            `;
-            list.appendChild(item);
-        });
-    });
-
-    // Функция одобрения
-    function approveSeller(id, name, phone) {
-        let sellerKey = "key-" + Math.floor(Math.random() * 1000000);
+    // Загружаем товары специально для удаления
+    function loadAdminProducts() {
+        const list = document.getElementById('adminProductList');
         
-        // Добавляем в список продавцов
-        db.ref('approvedSellers').push({
-            name: name,
-            phone: phone,
-            key: sellerKey
-        }).then(() => {
-            // Удаляем из заявок
-            db.ref('requests').child(id).remove();
-            alert("Продавец одобрен! Ключ: " + sellerKey);
+        db.ref('products').on('value', (snapshot) => {
+            const data = snapshot.val();
+            list.innerHTML = "";
+
+            if (!data) {
+                list.innerHTML = "<p>Товаров пока нет.</p>";
+                return;
+            }
+
+            Object.keys(data).forEach(id => {
+                const p = data[id];
+                const row = document.createElement('div');
+                row.className = 'product-row';
+                row.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <img src="${p.img || p.image}">
+                        <div>
+                            <strong>${p.name}</strong><br>
+                            <small>${p.price} сум</small>
+                        </div>
+                    </div>
+                    <button class="btn-delete" onclick="deleteProduct('${id}', '${p.name}')">Удалить</button>
+                `;
+                list.appendChild(row);
+            });
         });
     }
 
-    function deleteRequest(id) {
-        if(confirm("Удалить заявку?")) db.ref('requests').child(id).remove();
+    // Функция самого удаления
+    function deleteProduct(productId, productName) {
+        if (confirm("Вы уверены, что хотите удалить товар '" + productName + "'?")) {
+            db.ref('products/' + productId).remove()
+                .then(() => {
+                    alert("Товар удален!");
+                })
+                .catch((error) => {
+                    alert("Ошибка при удалении: " + error.message);
+                });
+        }
     }
 
-    function removeSeller(id) {
-        if(confirm("Заблокировать продавца? Его ключ перестанет работать.")) db.ref('approvedSellers').child(id).remove();
-    }
+    window.onload = loadAdminProducts;
 </script>
+
 </body>
 </html>
