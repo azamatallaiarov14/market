@@ -86,13 +86,17 @@
             if (catName === 'Все' || p.category === catName) {
                 let card = document.createElement('div');
                 card.className = 'product';
-                card.innerHTML = `
-                    <img src="${p.img || p.image}">
-                    <h3>${p.name}</h3>
-                    <p>${p.price} сум</p>
-                    <button class="btn-buy" onclick="addToCart('${id}', '${p.name}', '${p.price}', '${p.img || p.image}')">Купить</button>
-                `;
-                box.appendChild(card);
+             card.innerHTML = `
+    <!-- Клик по фото или названию ведет на страницу товара -->
+    <div onclick="window.location.href='product-details.html?id=${id}'" style="cursor:pointer;">
+        <img src="${p.img || p.image}">
+        <h3>${p.name}</h3>
+        <p>${p.price} сум</p>
+    </div>
+    <button class="btn-buy" onclick="addToCart('${id}', '${p.name}', '${p.price}', '${p.img || p.image}')">
+        Купить
+    </button>
+`;
             }
         });
     }
