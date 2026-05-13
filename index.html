@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Azamat Market - Global</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; background: #eee; margin: 0; padding: 0; padding-bottom: 70px; } /* Отступ снизу для панели */
+        body { font-family: sans-serif; background: #eee; margin: 0; padding: 0; padding-bottom: 80px; }
         
         /* Верхняя панель */
         header { 
@@ -18,43 +19,51 @@
         
         .product { background: #fff; padding: 10px; width: 160px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .product img { width: 100%; height: 120px; object-fit: contain; border-radius: 8px; }
-        .product h3 { font-size: 14px; margin: 10px 0 5px; height: 35px; overflow: hidden; }
+        .product h3 { font-size: 14px; margin: 10px 0 5px; height: 35px; overflow: hidden; color: #333; }
+        .product p { color: #27ae60; font-weight: bold; margin: 5px 0; }
         
-        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; }
-        .btn-buy { background: #27ae60; color: white; width: 100%; padding: 8px; margin-top: 5px; }
+        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: 0.3s; }
+        .btn-buy { background: #27ae60; color: white; width: 100%; padding: 10px; margin-top: 5px; }
+        .btn-buy:hover { background: #219150; }
 
-        /* НИЖНЯЯ ПАНЕЛЬ (как в Uzum) */
+        /* НИЖНЯЯ ПАНЕЛЬ */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: white; display: flex; justify-content: space-around;
-            padding: 10px 0; border-top: 1px solid #ddd; z-index: 100;
+            padding: 12px 0; border-top: 1px solid #ddd; z-index: 100;
         }
         .nav-item {
             text-align: center; text-decoration: none; color: #7f8c8d; font-size: 12px;
             display: flex; flex-direction: column; align-items: center; gap: 4px;
         }
-        .nav-item.active { color: #9b59b6; } /* Фиолетовый активный цвет */
-        .nav-icon { font-size: 20px; }
+        .nav-item.active { color: #9b59b6; } /* Фиолетовый цвет для активной вкладки */
+        .nav-icon { font-size: 22px; }
 
-        /* Стиль для кнопки "Вы" (всплывающее меню) */
-        #userMenu {
-            display: none; position: fixed; bottom: 70px; right: 20px;
-            background: white; box-shadow: 0 -2px 15px rgba(0,0,0,0.2);
-            border-radius: 15px; padding: 15px; width: 200px; z-index: 101;
-        }
+        footer { text-align: center; color: #888; font-size: 11px; padding: 20px 0 100px; }
     </style>
 </head>
 <body>
 
 <header>
-    <strong style="font-size: 20px;">AZAMAT MARKET</strong>
-    <a href="about.html" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">О нас</a>
+    <div style="display: flex; align-items: center;">
+        <strong style="font-size: 20px; margin-right: 15px;">AZAMAT MARKET</strong>
+        <a href="about.html" style="color: #bdc3c7; text-decoration: none; font-size: 13px;">О нас</a>
+    </div>
 </header>
 
+<!-- Витрина товаров -->
 <div class="container" id="box">
-    <h2 style="color:#bbb; width:100%; text-align:center;">Загрузка товаров...</h2>
+    <h2 style="color:#bbb; width:100%; text-align:center; font-weight: normal; margin-top: 50px;">
+        Загрузка товаров из облака...
+    </h2>
 </div>
 
+<footer>
+    <p>© 2026 Azamat Market. Global Cloud Version.</p>
+    <a href="admin.html" style="color:#ccc; text-decoration:none;">Админ-панель</a>
+</footer>
+
+<!-- НИЖНЯЯ ПАНЕЛЬ -->
 <div class="bottom-nav">
     <a href="index.html" class="nav-item active">
         <span class="nav-icon">🏠</span>
@@ -64,32 +73,18 @@
         <span class="nav-icon">🛒</span>
         <span>Корзина</span>
     </a>
-    <!-- ТЕПЕРЬ ЭТО ПРОСТО ССЫЛКА НА НОВУЮ СТРАНИЦУ -->
     <a href="profile.html" class="nav-item">
         <span class="nav-icon">👤</span>
         <span>Вы</span>
     </a>
 </div>
 
-<div class="bottom-nav">
-    <a href="index.html" class="nav-item active">
-        <span class="nav-icon">🏠</span>
-        <span>Главная</span>
-    </a>
-    <a href="cart.html" class="nav-item">
-        <span class="nav-icon">🛒</span>
-        <span>Корзина</span>
-    </a>
-    <div class="nav-item" onclick="toggleUserMenu()" style="cursor:pointer;">
-        <span class="nav-icon">👤</span>
-        <span>Вы</span>
-    </div>
-</div>
-
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
+    // ТВОИ КЛЮЧИ FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
         authDomain: "azamat-market-a9eba.firebaseapp.com",
@@ -103,56 +98,64 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Функция открытия меню "Вы"
-    function toggleUserMenu() {
-        const menu = document.getElementById('userMenu');
-        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-    }
-
+    // Загрузка товаров
     function loadProducts() {
         const box = document.getElementById('box');
+        
         db.ref('products').on('value', (snapshot) => {
             const data = snapshot.val();
-            box.innerHTML = "";
+            box.innerHTML = ""; 
+
             if (!data) {
-                box.innerHTML = "<h2>Пусто</h2>";
+                box.innerHTML = "<h2 style='color:#bbb; width:100%; text-align:center;'>На складе пока пусто.</h2>";
                 return;
             }
+
             Object.keys(data).forEach(id => {
                 const p = data[id];
+                const imgSource = p.img || p.image; 
+                
                 let card = document.createElement('div');
                 card.className = 'product';
                 card.innerHTML = `
-                    <img src="${p.img || p.image}">
+                    <img src="${imgSource}">
                     <h3>${p.name}</h3>
-                    <p><strong>${p.price} сум</strong></p>
-                    <button class="btn-buy" onclick="addToCart('${id}', '${p.name}', '${p.price}', '${p.img || p.image}')">Купить</button>
+                    <p>${p.price} сум</p>
+                    <button class="btn-buy" onclick="addToCart('${id}', '${p.name}', '${p.price}', '${imgSource}')">
+                        Купить
+                    </button>
                 `;
                 box.appendChild(card);
             });
         });
     }
 
+    // Добавление в облачную корзину
     function addToCart(productId, name, price, image) {
         const user = JSON.parse(localStorage.getItem('currentUser'));
-        if (!user) { alert("Войдите в аккаунт!"); window.location.href='auth.html'; return; }
-        db.ref('carts/' + user.login).push({ productId, name, price, image, date: Date.now() });
-        alert("Добавлено в корзину!");
+
+        if (!user) {
+            alert("Пожалуйста, войдите в аккаунт, чтобы покупать товары!");
+            window.location.href = 'auth.html';
+            return;
+        }
+
+        db.ref('carts/' + user.login).push({
+            productId: productId,
+            name: name,
+            price: price,
+            image: image,
+            date: Date.now()
+        }).then(() => {
+            alert("Товар добавлен в корзину!");
+        });
     }
 
+    // Запуск при открытии
     window.onload = function() {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        if (user) {
-            document.getElementById('userInfo').innerText = "👋 " + user.login;
-            document.getElementById('authAction').innerHTML = `<button onclick="logout()" style="background:none; border:none; color:#ff7675; padding:10px 0; cursor:pointer; font-weight:bold;">Выйти</button>`;
-        }
         loadProducts();
     };
-
-    function logout() {
-        localStorage.removeItem('currentUser');
-        location.reload();
-    }
 </script>
+
 </body>
 </html>
