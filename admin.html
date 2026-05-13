@@ -2,26 +2,49 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Управление товарами - Admin</title>
+    <title>Админ-панель - Azamat Market</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .admin-container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .product-row { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+        body { font-family: sans-serif; background: #2c3e50; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        /* Экран входа */
+        #auth-screen { background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 300px; }
+        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; text-align: center; }
+        .btn-entry { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        
+        /* Панель управления (после входа) */
+        #admin-main { display: none; background: #f4f4f4; width: 100%; min-height: 100vh; align-self: flex-start; padding: 20px; box-sizing: border-box; }
+        .admin-card { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .product-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; background: white; margin-bottom: 5px; border-radius: 8px; }
         .product-row img { width: 50px; height: 50px; object-fit: contain; }
-        .btn-delete { background: #ff7675; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-delete:hover { background: #e84393; }
-        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #3498db; }
+        .btn-delete { background: #ff7675; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="admin-container">
-    <a href="index.html" class="back-link">← На главную</a>
-    <h2>Управление товарами</h2>
-    <div id="adminProductList">Загрузка товаров...</div>
+<!-- 1. ЭКРАН ВХОДА -->
+<div id="auth-screen">
+    <h2 style="margin:0; color:#2c3e50;">Azamat Admin</h2>
+    <input type="password" id="passInput" placeholder="Введите пароль">
+    <button class="btn-entry" onclick="verify()">Войти</button>
+    <p id="error" style="color:red; font-size:13px; display:none; margin-top:10px;">Неверный пароль!</p>
+    <br><br>
+    <a href="index.html" style="color:#7f8c8d; text-decoration:none; font-size:14px;">← Вернуться в магазин</a>
 </div>
 
+<!-- 2. ГЛАВНАЯ ПАНЕЛЬ (СКРЫТА) -->
+<div id="admin-main">
+    <div class="admin-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="margin:0;">📦 Управление товарами</h2>
+            <button onclick="location.reload()" style="background:#ddd; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">Выход</button>
+        </div>
+        <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+        <div id="list">Загрузка данных из облака...</div>
+    </div>
+</div>
+
+<!-- FIREBASE SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -36,55 +59,59 @@
         appId: "1:279981697073:web:e841afeebb43b67ba00d10"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    function verify() {
+        const p = document.getElementById('passInput').value;
+        if (p === "azamat2026") {
+            // Если пароль верный — переключаем экраны
+            document.getElementById('auth-screen').style.display = 'none';
+            document.body.style.background = '#f4f4f4';
+            document.getElementById('admin-main').style.display = 'block';
+            
+            // Только ТЕПЕРЬ запускаем Firebase
+            startAdmin();
+        } else {
+            document.getElementById('error').style.display = 'block';
+        }
+    }
 
-    // Загружаем товары специально для удаления
-    function loadAdminProducts() {
-        const list = document.getElementById('adminProductList');
+    function startAdmin() {
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
         
         db.ref('products').on('value', (snapshot) => {
             const data = snapshot.val();
-            list.innerHTML = "";
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = "";
 
             if (!data) {
-                list.innerHTML = "<p>Товаров пока нет.</p>";
+                listDiv.innerHTML = "<h3>Товаров пока нет.</h3>";
                 return;
             }
 
             Object.keys(data).forEach(id => {
-                const p = data[id];
-                const row = document.createElement('div');
-                row.className = 'product-row';
-                row.innerHTML = `
+                const item = data[id];
+                const div = document.createElement('div');
+                div.className = 'product-row';
+                div.innerHTML = `
                     <div style="display:flex; align-items:center; gap:15px;">
-                        <img src="${p.img || p.image}">
+                        <img src="${item.img || item.image}">
                         <div>
-                            <strong>${p.name}</strong><br>
-                            <small>${p.price} сум</small>
+                            <div style="font-weight:bold;">${item.name}</div>
+                            <div style="color:#27ae60; font-size:14px;">${item.price} сум</div>
                         </div>
                     </div>
-                    <button class="btn-delete" onclick="deleteProduct('${id}', '${p.name}')">Удалить</button>
+                    <button class="btn-delete" onclick="drop('${id}', '${item.name}')">Удалить</button>
                 `;
-                list.appendChild(row);
+                listDiv.appendChild(div);
             });
         });
     }
 
-    // Функция самого удаления
-    function deleteProduct(productId, productName) {
-        if (confirm("Вы уверены, что хотите удалить товар '" + productName + "'?")) {
-            db.ref('products/' + productId).remove()
-                .then(() => {
-                    alert("Товар удален!");
-                })
-                .catch((error) => {
-                    alert("Ошибка при удалении: " + error.message);
-                });
+    function drop(id, name) {
+        if (confirm("Точно удалить " + name + "?")) {
+            firebase.database().ref('products/' + id).remove();
         }
     }
-
-    window.onload = loadAdminProducts;
 </script>
 
 </body>
