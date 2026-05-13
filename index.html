@@ -6,27 +6,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: sans-serif; background: #eee; margin: 0; padding: 0; padding-bottom: 80px; }
-        header { background: #2c3e50; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
         
-        /* Стили для выбора языка */
-        .lang-select { background: #34495e; color: white; border: 1px solid #555; padding: 5px; border-radius: 8px; font-size: 13px; outline: none; cursor: pointer; }
+        /* ШАПКА */
+        header { 
+            background: #2c3e50; 
+            color: #fff; 
+            padding: 15px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+        
+        /* СТИЛЬНЫЙ ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКОВ */
+        .lang-switcher {
+            display: flex;
+            background: #34495e;
+            padding: 3px;
+            border-radius: 10px;
+            border: 1px solid #455a64;
+        }
 
-        .categories { display: flex; overflow-x: auto; padding: 10px; gap: 10px; background: white; white-space: nowrap; position: sticky; top: 55px; z-index: 9; border-bottom: 1px solid #ddd; }
+        .lang-option {
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 7px;
+            transition: all 0.3s ease;
+            color: #bdc3c7;
+        }
+
+        .lang-option.active {
+            background: #9b59b6;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* КАТЕГОРИИ */
+        .categories { 
+            display: flex; 
+            overflow-x: auto; 
+            padding: 10px; 
+            gap: 10px; 
+            background: white; 
+            white-space: nowrap; 
+            position: sticky; 
+            top: 60px; 
+            z-index: 90; 
+            border-bottom: 1px solid #ddd; 
+        }
         .categories::-webkit-scrollbar { display: none; }
         .cat-btn { background: #f1f2f6; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: bold; color: #57606f; transition: 0.3s; outline: none; }
         .cat-btn.active { background: #9b59b6; color: white; }
 
+        /* ТОВАРЫ */
         .container { display: flex; flex-wrap: wrap; gap: 15px; padding: 15px; justify-content: center; }
-        
         .product { background: #fff; padding: 10px; width: 160px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
-        .product-info { cursor: pointer; }
-        .product img { width: 100%; height: 120px; object-fit: contain; border-radius: 8px; }
+        .product img { width: 100%; height: 120px; object-fit: contain; border-radius: 8px; cursor: pointer; }
         .product h3 { font-size: 14px; margin: 10px 0 5px; height: 35px; overflow: hidden; color: #333; text-align: left; line-height: 1.2; }
         .product .price { color: #27ae60; font-weight: bold; margin: 5px 0; text-align: left; font-size: 15px; }
         
         .btn-buy { background: #27ae60; color: white; width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-buy:active { transform: scale(0.95); }
 
+        /* НАВИГАЦИЯ */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #ddd; z-index: 100; }
         .nav-item { text-align: center; text-decoration: none; color: #7f8c8d; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item.active { color: #9b59b6; }
@@ -40,12 +86,12 @@
         <strong style="font-size: 18px; margin-right: 10px;">AZAMAT MARKET</strong>
         <a href="about.html" id="txt-about" style="color: #bdc3c7; text-decoration: none; font-size: 13px;">О нас</a>
     </div>
-    <!-- Переключатель языка -->
-    <select class="lang-select" id="langSelect" onchange="changeLanguage(this.value)">
-        <option value="ru">RU</option>
-        <option value="uz">UZ</option>
-        <option value="en">EN</option>
-    </select>
+    
+    <div class="lang-switcher">
+        <span class="lang-option" id="btn-ru" onclick="changeLanguage('ru')">RU</span>
+        <span class="lang-option" id="btn-uz" onclick="changeLanguage('uz')">UZ</span>
+        <span class="lang-option" id="btn-en" onclick="changeLanguage('en')">EN</span>
+    </div>
 </header>
 
 <div class="categories" id="catBar">
@@ -76,57 +122,26 @@
     </a>
 </div>
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-    // 1. СЛОВАРЬ ПЕРЕВОДОВ
+    // СЛОВАРЬ ПЕРЕВОДОВ
     const translations = {
         ru: {
-            about: "О нас",
-            all: "Все",
-            electronics: "Электроника",
-            clothing: "Одежда",
-            home: "Дом",
-            accs: "Аксессуары",
-            other: "Другое",
-            buy: "Купить",
-            nav_home: "Главная",
-            nav_cart: "Корзина",
-            nav_you: "Вы",
-            loading: "Загрузка товаров...",
-            sum: "сум"
+            about: "О нас", all: "Все", electronics: "Электроника", clothing: "Одежда", 
+            home: "Дом", accs: "Аксессуары", other: "Другое", buy: "Купить", 
+            nav_home: "Главная", nav_cart: "Корзина", nav_you: "Вы", loading: "Загрузка товаров...", sum: "сум"
         },
         uz: {
-            about: "Biz haqimizda",
-            all: "Barchasi",
-            electronics: "Elektronika",
-            clothing: "Kiyim-kechak",
-            home: "Uy uchun",
-            accs: "Aksessuarlar",
-            other: "Boshqa",
-            buy: "Sotib olish",
-            nav_home: "Asosiy",
-            nav_cart: "Savat",
-            nav_you: "Siz",
-            loading: "Yuklanmoqda...",
-            sum: "so'm"
+            about: "Biz haqimizda", all: "Barchasi", electronics: "Elektronika", clothing: "Kiyim-kechak", 
+            home: "Uy uchun", accs: "Aksessuarlar", other: "Boshqa", buy: "Sotib olish", 
+            nav_home: "Asosiy", nav_cart: "Savat", nav_you: "Siz", loading: "Yuklanmoqda...", sum: "so'm"
         },
         en: {
-            about: "About",
-            all: "All",
-            electronics: "Electronics",
-            clothing: "Clothing",
-            home: "Home",
-            accs: "Accessories",
-            other: "Other",
-            buy: "Buy",
-            nav_home: "Home",
-            nav_cart: "Cart",
-            nav_you: "You",
-            loading: "Loading products...",
-            sum: "sum"
+            about: "About", all: "All", electronics: "Electronics", clothing: "Clothing", 
+            home: "Home", accs: "Accessories", other: "Other", buy: "Buy", 
+            nav_home: "Home", nav_cart: "Cart", nav_you: "You", loading: "Loading products...", sum: "sum"
         }
     };
 
@@ -139,12 +154,12 @@
         messagingSenderId: "279981697073",
         appId: "1:279981697073:web:e841afeebb43b67ba00d10"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
     let allProducts = {};
 
-    // 2. ФУНКЦИЯ ПРИМЕНЕНИЯ ЯЗЫКА
+    // ОБНОВЛЕНИЕ ТЕКСТА ИНТЕРФЕЙСА
     function updateInterface() {
         const lang = localStorage.getItem('selectedLang') || 'ru';
         const t = translations[lang];
@@ -159,23 +174,18 @@
         document.getElementById('nav-home').innerText = t.nav_home;
         document.getElementById('nav-cart').innerText = t.nav_cart;
         document.getElementById('nav-you').innerText = t.nav_you;
-        document.getElementById('langSelect').value = lang;
-        
-        if(document.getElementById('txt-loading')) {
-            document.getElementById('txt-loading').innerText = t.loading;
-        }
+
+        if(document.getElementById('txt-loading')) document.getElementById('txt-loading').innerText = t.loading;
+
+        // Подсветка переключателя
+        document.querySelectorAll('.lang-option').forEach(opt => opt.classList.remove('active'));
+        document.getElementById('btn-' + lang).classList.add('active');
     }
 
     function changeLanguage(lang) {
         localStorage.setItem('selectedLang', lang);
         updateInterface();
-        renderCurrentProducts(); // Перерисовываем товары с новыми кнопками
-    }
-
-    function renderCurrentProducts() {
-        const activeBtn = document.querySelector('.cat-btn.active');
-        const currentCat = activeBtn ? activeBtn.getAttribute('onclick').match(/'([^']+)'/)[1] : 'Все';
-        filterCategory(currentCat, activeBtn);
+        renderProducts(); // Перерисовываем товары, чтобы обновить кнопки "Купить"
     }
 
     function filterCategory(catName, btn) {
@@ -183,20 +193,25 @@
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         }
+        window.currentCategory = catName;
+        renderProducts();
+    }
 
+    function renderProducts() {
         const lang = localStorage.getItem('selectedLang') || 'ru';
         const t = translations[lang];
         const box = document.getElementById('box');
+        const cat = window.currentCategory || 'Все';
+        
         box.innerHTML = "";
-
+        
         Object.keys(allProducts).forEach(id => {
             const p = allProducts[id];
-            // Фильтрация по категориям (сравнение идет по RU названиям из базы)
-            if (catName === 'Все' || p.category === catName) {
+            if (cat === 'Все' || p.category === cat) {
                 let card = document.createElement('div');
                 card.className = 'product';
                 card.innerHTML = `
-                    <div class="product-info" onclick="window.location.href='product-details.html?id=${id}'">
+                    <div onclick="window.location.href='product-details.html?id=${id}'">
                         <img src="${p.img || p.image}">
                         <h3>${p.name}</h3>
                         <div class="price">${p.price} ${t.sum}</div>
@@ -213,20 +228,16 @@
     function loadProducts() {
         db.ref('products').on('value', (snapshot) => {
             allProducts = snapshot.val() || {};
-            renderCurrentProducts();
+            renderProducts();
         });
     }
 
     function addToCart(productId, name, price, image) {
         const user = JSON.parse(localStorage.getItem('currentUser'));
-        if (!user) { alert("Please login!"); window.location.href = 'auth.html'; return; }
+        if (!user) { window.location.href = 'auth.html'; return; }
         
         db.ref('carts/' + user.login).push({
-            productId: productId,
-            name: name,
-            price: price,
-            image: image,
-            date: Date.now()
+            productId: productId, name: name, price: price, image: image, date: Date.now()
         }).then(() => {
             const lang = localStorage.getItem('selectedLang') || 'ru';
             alert(lang === 'uz' ? "Savatga qo'shildi!" : lang === 'en' ? "Added to cart!" : "Добавлено в корзину!");
