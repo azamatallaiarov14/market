@@ -8,7 +8,9 @@
         body { font-family: sans-serif; background: #eee; margin: 0; padding: 0; padding-bottom: 80px; }
         header { background: #2c3e50; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
         
-        /* Лента категорий */
+        /* Стили для выбора языка */
+        .lang-select { background: #34495e; color: white; border: 1px solid #555; padding: 5px; border-radius: 8px; font-size: 13px; outline: none; cursor: pointer; }
+
         .categories { display: flex; overflow-x: auto; padding: 10px; gap: 10px; background: white; white-space: nowrap; position: sticky; top: 55px; z-index: 9; border-bottom: 1px solid #ddd; }
         .categories::-webkit-scrollbar { display: none; }
         .cat-btn { background: #f1f2f6; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: bold; color: #57606f; transition: 0.3s; outline: none; }
@@ -16,9 +18,8 @@
 
         .container { display: flex; flex-wrap: wrap; gap: 15px; padding: 15px; justify-content: center; }
         
-        /* Карточка товара */
         .product { background: #fff; padding: 10px; width: 160px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
-        .product-info { cursor: pointer; } /* Область для клика */
+        .product-info { cursor: pointer; }
         .product img { width: 100%; height: 120px; object-fit: contain; border-radius: 8px; }
         .product h3 { font-size: 14px; margin: 10px 0 5px; height: 35px; overflow: hidden; color: #333; text-align: left; line-height: 1.2; }
         .product .price { color: #27ae60; font-weight: bold; margin: 5px 0; text-align: left; font-size: 15px; }
@@ -26,7 +27,6 @@
         .btn-buy { background: #27ae60; color: white; width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-buy:active { transform: scale(0.95); }
 
-        /* Нижняя панель */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #ddd; z-index: 100; }
         .nav-item { text-align: center; text-decoration: none; color: #7f8c8d; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item.active { color: #9b59b6; }
@@ -37,34 +37,99 @@
 
 <header>
     <div style="display: flex; align-items: center;">
-        <strong style="font-size: 20px; margin-right: 15px;">AZAMAT MARKET</strong>
-        <a href="about.html" style="color: #bdc3c7; text-decoration: none; font-size: 13px;">О нас</a>
+        <strong style="font-size: 18px; margin-right: 10px;">AZAMAT MARKET</strong>
+        <a href="about.html" id="txt-about" style="color: #bdc3c7; text-decoration: none; font-size: 13px;">О нас</a>
     </div>
+    <!-- Переключатель языка -->
+    <select class="lang-select" id="langSelect" onchange="changeLanguage(this.value)">
+        <option value="ru">RU</option>
+        <option value="uz">UZ</option>
+        <option value="en">EN</option>
+    </select>
 </header>
 
 <div class="categories" id="catBar">
-    <button class="cat-btn active" onclick="filterCategory('Все', this)">Все</button>
-    <button class="cat-btn" onclick="filterCategory('Электроника', this)">Электроника</button>
-    <button class="cat-btn" onclick="filterCategory('Одежда', this)">Одежда</button>
-    <button class="cat-btn" onclick="filterCategory('Дом', this)">Дом</button>
-    <button class="cat-btn" onclick="filterCategory('Аксессуары', this)">Аксессуары</button>
-    <button class="cat-btn" onclick="filterCategory('Другое', this)">Другое</button>
+    <button class="cat-btn active" id="cat-all" onclick="filterCategory('Все', this)">Все</button>
+    <button class="cat-btn" id="cat-electronics" onclick="filterCategory('Электроника', this)">Электроника</button>
+    <button class="cat-btn" id="cat-clothing" onclick="filterCategory('Одежда', this)">Одежда</button>
+    <button class="cat-btn" id="cat-home" onclick="filterCategory('Дом', this)">Дом</button>
+    <button class="cat-btn" id="cat-accs" onclick="filterCategory('Аксессуары', this)">Аксессуары</button>
+    <button class="cat-btn" id="cat-other" onclick="filterCategory('Другое', this)">Другое</button>
 </div>
 
 <div class="container" id="box">
-    <h2 style="color:#bbb; width:100%; text-align:center; font-weight: normal; margin-top: 50px;">Загрузка товаров...</h2>
+    <h2 id="txt-loading" style="color:#bbb; width:100%; text-align:center; font-weight: normal; margin-top: 50px;">Загрузка товаров...</h2>
 </div>
 
 <div class="bottom-nav">
-    <a href="index.html" class="nav-item active"><span class="nav-icon">🏠</span><span>Главная</span></a>
-    <a href="cart.html" class="nav-item"><span class="nav-icon">🛒</span><span>Корзина</span></a>
-    <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Вы</span></a>
+    <a href="index.html" class="nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span id="nav-home">Главная</span>
+    </a>
+    <a href="cart.html" class="nav-item">
+        <span class="nav-icon">🛒</span>
+        <span id="nav-cart">Корзина</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+        <span class="nav-icon">👤</span>
+        <span id="nav-you">Вы</span>
+    </a>
 </div>
 
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
+    // 1. СЛОВАРЬ ПЕРЕВОДОВ
+    const translations = {
+        ru: {
+            about: "О нас",
+            all: "Все",
+            electronics: "Электроника",
+            clothing: "Одежда",
+            home: "Дом",
+            accs: "Аксессуары",
+            other: "Другое",
+            buy: "Купить",
+            nav_home: "Главная",
+            nav_cart: "Корзина",
+            nav_you: "Вы",
+            loading: "Загрузка товаров...",
+            sum: "сум"
+        },
+        uz: {
+            about: "Biz haqimizda",
+            all: "Barchasi",
+            electronics: "Elektronika",
+            clothing: "Kiyim-kechak",
+            home: "Uy uchun",
+            accs: "Aksessuarlar",
+            other: "Boshqa",
+            buy: "Sotib olish",
+            nav_home: "Asosiy",
+            nav_cart: "Savat",
+            nav_you: "Siz",
+            loading: "Yuklanmoqda...",
+            sum: "so'm"
+        },
+        en: {
+            about: "About",
+            all: "All",
+            electronics: "Electronics",
+            clothing: "Clothing",
+            home: "Home",
+            accs: "Accessories",
+            other: "Other",
+            buy: "Buy",
+            nav_home: "Home",
+            nav_cart: "Cart",
+            nav_you: "You",
+            loading: "Loading products...",
+            sum: "sum"
+        }
+    };
+
     const firebaseConfig = {
         apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
         authDomain: "azamat-market-a9eba.firebaseapp.com",
@@ -79,15 +144,54 @@
 
     let allProducts = {};
 
-    function filterCategory(catName, btn) {
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    // 2. ФУНКЦИЯ ПРИМЕНЕНИЯ ЯЗЫКА
+    function updateInterface() {
+        const lang = localStorage.getItem('selectedLang') || 'ru';
+        const t = translations[lang];
 
+        document.getElementById('txt-about').innerText = t.about;
+        document.getElementById('cat-all').innerText = t.all;
+        document.getElementById('cat-electronics').innerText = t.electronics;
+        document.getElementById('cat-clothing').innerText = t.clothing;
+        document.getElementById('cat-home').innerText = t.home;
+        document.getElementById('cat-accs').innerText = t.accs;
+        document.getElementById('cat-other').innerText = t.other;
+        document.getElementById('nav-home').innerText = t.nav_home;
+        document.getElementById('nav-cart').innerText = t.nav_cart;
+        document.getElementById('nav-you').innerText = t.nav_you;
+        document.getElementById('langSelect').value = lang;
+        
+        if(document.getElementById('txt-loading')) {
+            document.getElementById('txt-loading').innerText = t.loading;
+        }
+    }
+
+    function changeLanguage(lang) {
+        localStorage.setItem('selectedLang', lang);
+        updateInterface();
+        renderCurrentProducts(); // Перерисовываем товары с новыми кнопками
+    }
+
+    function renderCurrentProducts() {
+        const activeBtn = document.querySelector('.cat-btn.active');
+        const currentCat = activeBtn ? activeBtn.getAttribute('onclick').match(/'([^']+)'/)[1] : 'Все';
+        filterCategory(currentCat, activeBtn);
+    }
+
+    function filterCategory(catName, btn) {
+        if(btn) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        const lang = localStorage.getItem('selectedLang') || 'ru';
+        const t = translations[lang];
         const box = document.getElementById('box');
         box.innerHTML = "";
 
         Object.keys(allProducts).forEach(id => {
             const p = allProducts[id];
+            // Фильтрация по категориям (сравнение идет по RU названиям из базы)
             if (catName === 'Все' || p.category === catName) {
                 let card = document.createElement('div');
                 card.className = 'product';
@@ -95,10 +199,10 @@
                     <div class="product-info" onclick="window.location.href='product-details.html?id=${id}'">
                         <img src="${p.img || p.image}">
                         <h3>${p.name}</h3>
-                        <div class="price">${p.price} сум</div>
+                        <div class="price">${p.price} ${t.sum}</div>
                     </div>
                     <button class="btn-buy" onclick="addToCart('${id}', '${p.name}', '${p.price}', '${p.img || p.image}')">
-                        Купить
+                        ${t.buy}
                     </button>
                 `;
                 box.appendChild(card);
@@ -109,14 +213,13 @@
     function loadProducts() {
         db.ref('products').on('value', (snapshot) => {
             allProducts = snapshot.val() || {};
-            const activeBtn = document.querySelector('.cat-btn.active');
-            filterCategory(activeBtn.innerText, activeBtn);
+            renderCurrentProducts();
         });
     }
 
     function addToCart(productId, name, price, image) {
         const user = JSON.parse(localStorage.getItem('currentUser'));
-        if (!user) { alert("Войдите в аккаунт!"); window.location.href = 'auth.html'; return; }
+        if (!user) { alert("Please login!"); window.location.href = 'auth.html'; return; }
         
         db.ref('carts/' + user.login).push({
             productId: productId,
@@ -125,11 +228,15 @@
             image: image,
             date: Date.now()
         }).then(() => {
-            alert("Товар добавлен в корзину!");
+            const lang = localStorage.getItem('selectedLang') || 'ru';
+            alert(lang === 'uz' ? "Savatga qo'shildi!" : lang === 'en' ? "Added to cart!" : "Добавлено в корзину!");
         });
     }
 
-    window.onload = loadProducts;
+    window.onload = () => {
+        updateInterface();
+        loadProducts();
+    };
 </script>
 </body>
 </html>
