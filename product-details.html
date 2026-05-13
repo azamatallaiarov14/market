@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Описание товара - Azamat Market</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 20px; padding-bottom: 80px; }
+        .back-btn { text-decoration: none; color: #3498db; font-weight: bold; display: block; margin-bottom: 15px; }
+        .product-page { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .product-img { width: 100%; height: 300px; object-fit: contain; background: white; }
+        .info { padding: 20px; }
+        .price { color: #27ae60; font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .category-tag { background: #eee; padding: 5px 12px; border-radius: 15px; font-size: 12px; color: #666; }
+        .desc { line-height: 1.6; color: #555; margin-top: 15px; }
+        .buy-panel { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; }
+        .btn-cart-big { background: #27ae60; color: white; border: none; flex: 1; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<a href="index.html" class="back-btn">← Назад на главную</a>
+
+<div class="product-page" id="productContent">
+    <p style="padding: 20px; text-align: center;">Загрузка информации о товаре...</p>
+</div>
+
+<div class="buy-panel" id="buyPanel" style="display: none;">
+    <button class="btn-cart-big" onclick="addToCartFromPage()">Добавить в корзину</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
+        authDomain: "azamat-market-a9eba.firebaseapp.com",
+        databaseURL: "https://azamat-market-a9eba-default-rtdb.firebaseio.com/",
+        projectId: "azamat-market-a9eba",
+        storageBucket: "azamat-market-a9eba.firebasestorage.app",
+        messagingSenderId: "279981697073",
+        appId: "1:279981697073:web:e841afeebb43b67ba00d10"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Получаем ID товара из ссылки (?id=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    let currentProduct = null;
+
+    if (productId) {
+        db.ref('products/' + productId).once('value', (snapshot) => {
+            const p = snapshot.val();
+            if (p) {
+                currentProduct = p;
+                document.getElementById('productContent').innerHTML = `
+                    <img src="${p.img || p.image}" class="product-img">
+                    <div class="info">
+                        <span class="category-tag">${p.category || 'Общее'}</span>
+                        <h1>${p.name}</h1>
+                        <div class="price">${p.price} сум</div>
+                        <div class="desc">
+                            <strong>Описание:</strong><br>
+                            ${p.description || 'Продавец не добавил подробное описание для этого товара.'}
+                        </div>
+                    </div>
+                `;
+                document.getElementById('buyPanel').style.display = 'flex';
+            } else {
+                document.getElementById('productContent').innerHTML = "<h2>Товар не найден</h2>";
+            }
+        });
+    }
+
+    function addToCartFromPage() {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        if (!user) { alert("Войдите в аккаунт!"); window.location.href = 'auth.html'; return; }
+        
+        db.ref('carts/' + user.login).push({
+            productId: productId,
+            name: currentProduct.name,
+            price: currentProduct.price,
+            image: currentProduct.img || currentProduct.image,
+            date: Date.now()
+        }).then(() => { alert("Добавлено в корзину!"); });
+    }
+</script>
+</body>
+</html>
