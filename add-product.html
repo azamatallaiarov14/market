@@ -3,34 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>Добавить товар - Azamat Market</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .form-card { background: white; max-width: 400px; margin: 0 auto; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        .form-card { background: white; max-width: 450px; margin: 0 auto; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+        
+        label { display: block; margin-top: 15px; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: bold; }
+        input, select, textarea { 
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; 
+            box-sizing: border-box; font-size: 16px; outline: none; transition: 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+        
+        textarea { height: 120px; resize: none; font-family: sans-serif; }
+        
+        button { 
+            width: 100%; padding: 15px; background: #27ae60; color: white; border: none; 
+            border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 25px; font-size: 16px;
+        }
+        button:hover { background: #219150; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #7f8c8d; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="form-card">
     <h2>Новый товар</h2>
-    <input type="text" id="pName" placeholder="Название товара">
-    <input type="number" id="pPrice" placeholder="Цена (сум)">
-    <input type="text" id="pImg" placeholder="Ссылка на фото товара">
     
-    <label style="font-size: 14px; color: #666;">Категория:</label>
+    <label>Название товара</label>
+    <input type="text" id="pName" placeholder="Например: iPhone 15 Pro">
+    
+    <label>Цена (в сумах)</label>
+    <input type="number" id="pPrice" placeholder="Например: 12000000">
+    
+    <label>Ссылка на изображение</label>
+    <input type="text" id="pImg" placeholder="Вставьте ссылку на картинку">
+    
+    <label>Категория</label>
     <select id="pCategory">
-        <option value="Другое">Другое</option>
+        <option value="Другое">Выберите категорию</option>
         <option value="Электроника">Электроника</option>
         <option value="Одежда">Одежда</option>
         <option value="Дом">Дом</option>
+        <option value="Аксессуары">Аксессуары</option>
     </select>
+    
+    <label>Описание товара</label>
+    <textarea id="pDesc" placeholder="Расскажите о товаре подробно (характеристики, состояние, функции)..."></textarea>
 
     <button onclick="saveProduct()">Опубликовать на витрину</button>
-    <br><br>
-    <a href="admin.html" style="display:block; text-align:center; color:#7f8c8d; text-decoration:none;">Назад</a>
+    <a href="admin.html" class="back-link">← Вернуться в админку</a>
 </div>
 
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -44,6 +70,7 @@
         messagingSenderId: "279981697073",
         appId: "1:279981697073:web:e841afeebb43b67ba00d10"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -52,19 +79,31 @@
         const price = document.getElementById('pPrice').value;
         const img = document.getElementById('pImg').value;
         const category = document.getElementById('pCategory').value;
+        const description = document.getElementById('pDesc').value;
 
-        if(!name || !price || !img) { alert("Заполните все поля!"); return; }
+        // Простая проверка полей
+        if(!name || !price || !img || !description) { 
+            alert("Пожалуйста, заполните все поля, включая описание!"); 
+            return; 
+        }
 
+        // Сохраняем расширенный объект товара
         db.ref('products').push({
             name: name,
             price: price,
             img: img,
-            category: category
+            category: category,
+            description: description,
+            dateAdded: Date.now()
         }).then(() => {
-            alert("Товар добавлен!");
-            window.location.href = 'index.html';
+            alert("Товар успешно добавлен!");
+            window.location.href = 'index.html'; // Возвращаемся на главную
+        }).catch((error) => {
+            console.error("Ошибка при сохранении:", error);
+            alert("Произошла ошибка. Проверьте консоль.");
         });
     }
 </script>
+
 </body>
 </html>
