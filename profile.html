@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Мой профиль - Azamat Market</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 20px; padding-bottom: 80px; }
+        .profile-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .user-icon { font-size: 50px; background: #eee; width: 80px; height: 80px; line-height: 80px; border-radius: 50%; margin: 0 auto 15px; }
+        .menu-list { margin-top: 20px; text-align: left; }
+        .menu-item { display: block; padding: 15px; background: white; margin-bottom: 10px; border-radius: 10px; text-decoration: none; color: #333; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .btn-logout { width: 100%; padding: 15px; background: #ff7675; color: white; border: none; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        
+        /* Нижняя панель */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ddd; }
+        .nav-item { text-align: center; text-decoration: none; color: #7f8c8d; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: #9b59b6; }
+    </style>
+</head>
+<body>
+
+<div class="profile-card">
+    <div class="user-icon">👤</div>
+    <h2 id="userName">Гость</h2>
+    <p id="userStatus" style="color: #888;">Войдите, чтобы совершать покупки</p>
+</div>
+
+<div class="menu-list">
+    <a href="seller-request.html" class="menu-item" style="color: #9b59b6;">
+        🚀 Стать продавцом <span>➔</span>
+    </a>
+    <a href="about.html" class="menu-item">
+        ℹ️ О нас <span>➔</span>
+    </a>
+    <div id="authSection">
+        <a href="auth.html" class="menu-item" style="color: #3498db;">🔑 Войти в аккаунт <span>➔</span></a>
+    </div>
+</div>
+
+<button id="logoutBtn" class="btn-logout" style="display: none;" onclick="logout()">Выйти из системы</button>
+
+<!-- НИЖНЯЯ ПАНЕЛЬ -->
+<div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+        <span style="font-size: 20px;">🏠</span>
+        <span>Главная</span>
+    </a>
+    <a href="cart.html" class="nav-item">
+        <span style="font-size: 20px;">🛒</span>
+        <span>Корзина</span>
+    </a>
+    <a href="profile.html" class="nav-item active">
+        <span style="font-size: 20px;">👤</span>
+        <span>Вы</span>
+    </a>
+</div>
+
+<script>
+    window.onload = function() {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        if (user) {
+            document.getElementById('userName').innerText = user.login;
+            document.getElementById('userStatus').innerText = "Активный покупатель";
+            document.getElementById('logoutBtn').style.display = "block";
+            document.getElementById('authSection').style.display = "none";
+        }
+    };
+
+    function logout() {
+        localStorage.removeItem('currentUser');
+        location.href = 'index.html';
+    }
+</script>
+
+</body>
+</html>
