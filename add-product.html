@@ -2,26 +2,33 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Добавить товар - Облако</title>
+    <title>Добавить товар - Azamat Market</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .form-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .btn-save { background: #9b59b6; }
-        .btn-back { background: #7f8c8d; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .form-card { background: white; max-width: 400px; margin: 0 auto; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="form-card" id="mainContent" style="display:none;">
-    <h2>Новый товар (Cloud)</h2>
-    <input type="text" id="n" placeholder="Название товара">
-    <input type="number" id="p" placeholder="Цена (сум)">
-    <input type="text" id="i" placeholder="Ссылка на фото">
+<div class="form-card">
+    <h2>Новый товар</h2>
+    <input type="text" id="pName" placeholder="Название товара">
+    <input type="number" id="pPrice" placeholder="Цена (сум)">
+    <input type="text" id="pImg" placeholder="Ссылка на фото товара">
     
-    <button class="btn-save" onclick="saveToCloud()">Опубликовать в Azamat Market</button>
-    <button class="btn-back" onclick="window.location.href='index.html'">Назад</button>
+    <label style="font-size: 14px; color: #666;">Категория:</label>
+    <select id="pCategory">
+        <option value="Другое">Другое</option>
+        <option value="Электроника">Электроника</option>
+        <option value="Одежда">Одежда</option>
+        <option value="Дом">Дом</option>
+    </select>
+
+    <button onclick="saveProduct()">Опубликовать на витрину</button>
+    <br><br>
+    <a href="admin.html" style="display:block; text-align:center; color:#7f8c8d; text-decoration:none;">Назад</a>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -37,55 +44,25 @@
         messagingSenderId: "279981697073",
         appId: "1:279981697073:web:e841afeebb43b67ba00d10"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Проверка ключа (как мы делали раньше)
-    window.onload = function() {
-    let userKey = prompt("Введите ваш личный ключ продавца:");
-    
-    if (userKey === "admin") {
-        document.getElementById('mainContent').style.display = 'block';
-        return;
-    }
+    function saveProduct() {
+        const name = document.getElementById('pName').value;
+        const price = document.getElementById('pPrice').value;
+        const img = document.getElementById('pImg').value;
+        const category = document.getElementById('pCategory').value;
 
-    // Проверяем ключ в Firebase
-    db.ref('approvedSellers').orderByChild('key').equalTo(userKey).once('value', (snapshot) => {
-        if (snapshot.exists()) {
-            let sellerData = snapshot.val();
-            // Получаем имя первого найденного продавца
-            let name = Object.values(sellerData)[0].name;
-            alert("Добро пожаловать, " + name + "!");
-            document.getElementById('mainContent').style.display = 'block';
-        } else {
-            alert("Доступ запрещен! Ключ не найден в базе.");
-            window.location.href = "index.html";
-        }
-    });
-};
-    function saveToCloud() {
-        let name = document.getElementById('n').value;
-        let price = document.getElementById('p').value;
-        let img = document.getElementById('i').value;
+        if(!name || !price || !img) { alert("Заполните все поля!"); return; }
 
-        if (name == "" || price == "") {
-            alert("Заполните поля!");
-            return;
-        }
-
-        if (img == "") { img = "https://via.placeholder.com/150"; }
-
-        // ОТПРАВКА В FIREBASE
         db.ref('products').push({
             name: name,
             price: price,
-            img: img
+            img: img,
+            category: category
         }).then(() => {
-            alert("Товар успешно улетел в облако!");
-            window.location.href = "index.html";
-        }).catch((error) => {
-            alert("Ошибка: " + error.message);
+            alert("Товар добавлен!");
+            window.location.href = 'index.html';
         });
     }
 </script>
