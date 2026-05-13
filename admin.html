@@ -2,53 +2,37 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Админ-панель - Azamat Market</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>🔒 Вход в систему</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; background: #2c3e50; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        /* Стили только для экрана входа */
+        body { font-family: sans-serif; background: #1a1a1a; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: white; }
+        .lock-box { background: #222; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px-35px rgba(0,0,0,0.7); width: 320px; border: 1px solid #333; }
+        input { width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #444; border-radius: 12px; background: #333; color: white; font-size: 18px; text-align: center; outline: none; }
+        input:focus { border-color: #9b59b6; }
+        button { width: 100%; padding: 15px; background: #9b59b6; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
         
-        /* Экран входа */
-        #auth-screen { background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 300px; }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; text-align: center; }
-        .btn-entry { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        
-        /* Панель управления (после входа) */
-        #admin-main { display: none; background: #f4f4f4; width: 100%; min-height: 100vh; align-self: flex-start; padding: 20px; box-sizing: border-box; }
-        .admin-card { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .product-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; background: white; margin-bottom: 5px; border-radius: 8px; }
-        .product-row img { width: 50px; height: 50px; object-fit: contain; }
-        .btn-delete { background: #ff7675; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        /* Стили для панели управления (появятся потом) */
+        .admin-main { background: #f4f4f4; width: 100%; min-height: 100vh; padding: 20px; color: #333; }
+        .product-row { display: flex; align-items: center; justify-content: space-between; padding: 15px; background: white; margin-bottom: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
-<!-- 1. ЭКРАН ВХОДА -->
-<div id="auth-screen">
-    <h2 style="margin:0; color:#2c3e50;">Azamat Admin</h2>
-    <input type="password" id="passInput" placeholder="Введите пароль">
-    <button class="btn-entry" onclick="verify()">Войти</button>
-    <p id="error" style="color:red; font-size:13px; display:none; margin-top:10px;">Неверный пароль!</p>
-    <br><br>
-    <a href="index.html" style="color:#7f8c8d; text-decoration:none; font-size:14px;">← Вернуться в магазин</a>
+<div id="authArea" class="lock-box">
+    <h1 style="margin:0; font-size: 24px;">Azamat Market</h1>
+    <p style="color: #888; margin-top: 10px;">Панель управления</p>
+    <input type="password" id="passCode" placeholder="••••••••">
+    <button onclick="unlock()">Войти в систему</button>
+    <p id="warn" style="color: #ff7675; display: none; margin-top: 15px; font-size: 14px;">Доступ ограничен!</p>
 </div>
 
-<!-- 2. ГЛАВНАЯ ПАНЕЛЬ (СКРЫТА) -->
-<div id="admin-main">
-    <div class="admin-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 style="margin:0;">📦 Управление товарами</h2>
-            <button onclick="location.reload()" style="background:#ddd; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">Выход</button>
-        </div>
-        <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-        <div id="list">Загрузка данных из облака...</div>
-    </div>
-</div>
-
-<!-- FIREBASE SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
+    // Твои настройки Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAtMUKrBPOQ3bwkyK5SwAhWLRGSFKH-ajU",
         authDomain: "azamat-market-a9eba.firebaseapp.com",
@@ -59,60 +43,64 @@
         appId: "1:279981697073:web:e841afeebb43b67ba00d10"
     };
 
-    function verify() {
-        const p = document.getElementById('passInput').value;
-        if (p === "azamat2026") {
-            // Если пароль верный — переключаем экраны
-            document.getElementById('auth-screen').style.display = 'none';
-            document.body.style.background = '#f4f4f4';
-            document.getElementById('admin-main').style.display = 'block';
-            
-            // Только ТЕПЕРЬ запускаем Firebase
-            startAdmin();
+    function unlock() {
+        const val = document.getElementById('passCode').value;
+        if (val === "azamat2026") {
+            // Полностью переписываем тело страницы
+            document.getElementById('mainBody').style.background = "#f4f4f4";
+            document.getElementById('mainBody').style.display = "block";
+            document.getElementById('mainBody').innerHTML = `
+                <div class="admin-main">
+                    <div style="max-width: 800px; margin: 0 auto;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h2>📦 Список всех товаров</h2>
+                            <button onclick="location.reload()" style="background:#ddd; border:none; padding:10px 15px; border-radius:8px; cursor:pointer; color:#333;">Выйти</button>
+                        </div>
+                        <hr style="border:0; border-top:1px solid #ddd; margin: 20px 0;">
+                        <div id="productList">Загрузка товаров из базы данных...</div>
+                    </div>
+                </div>
+            `;
+            startFirebase();
         } else {
-            document.getElementById('error').style.display = 'block';
+            document.getElementById('warn').style.display = 'block';
         }
     }
 
-    function startAdmin() {
+    function startFirebase() {
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
         
         db.ref('products').on('value', (snapshot) => {
             const data = snapshot.val();
-            const listDiv = document.getElementById('list');
-            listDiv.innerHTML = "";
-
-            if (!data) {
-                listDiv.innerHTML = "<h3>Товаров пока нет.</h3>";
-                return;
-            }
+            const list = document.getElementById('productList');
+            list.innerHTML = "";
+            if (!data) { list.innerHTML = "<h3>Товаров нет</h3>"; return; }
 
             Object.keys(data).forEach(id => {
-                const item = data[id];
+                const p = data[id];
                 const div = document.createElement('div');
                 div.className = 'product-row';
                 div.innerHTML = `
                     <div style="display:flex; align-items:center; gap:15px;">
-                        <img src="${item.img || item.image}">
+                        <img src="${p.img || p.image}" style="width:50px; height:50px; object-fit:contain;">
                         <div>
-                            <div style="font-weight:bold;">${item.name}</div>
-                            <div style="color:#27ae60; font-size:14px;">${item.price} сум</div>
+                            <strong>${p.name}</strong><br>
+                            <span style="font-size:13px; color:#888;">${p.price} сум</span>
                         </div>
                     </div>
-                    <button class="btn-delete" onclick="drop('${id}', '${item.name}')">Удалить</button>
+                    <button onclick="del('${id}', '${p.name}')" style="background:#ff7675; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">Удалить</button>
                 `;
-                listDiv.appendChild(div);
+                list.appendChild(div);
             });
         });
     }
 
-    function drop(id, name) {
-        if (confirm("Точно удалить " + name + "?")) {
+    function del(id, name) {
+        if (confirm("Удалить '" + name + "'?")) {
             firebase.database().ref('products/' + id).remove();
         }
     }
 </script>
-
 </body>
 </html>
